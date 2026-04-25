@@ -3,6 +3,37 @@
 const Auth = ({ onComplete }) => {
   const Icon = window.Icon;
   const [mode, setMode] = React.useState('signin');
+  const [name, setName] = React.useState('');
+  const [email, setEmail] = React.useState('');
+  const [password, setPassword] = React.useState('');
+  const [error, setError] = React.useState('');
+  const [loading, setLoading] = React.useState(false);
+
+  const submit = async () => {
+    setError('');
+    setLoading(true);
+    try {
+      const endpoint = mode === 'signin' ? '/api/auth/login' : '/api/auth/register';
+      const payload = mode === 'signin' ? { email, password } : { name, email, password };
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(result?.error?.message || 'Authentication failed.');
+      onComplete(result.data.user);
+    } catch (err) {
+      setError(err.message || 'Authentication failed.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const switchMode = () => {
+    setMode(mode === 'signin' ? 'signup' : 'signin');
+    setError('');
+  };
   return (
     <div style={as.page}>
       <div style={as.left}>
@@ -22,34 +53,40 @@ const Auth = ({ onComplete }) => {
             {mode === 'signup' && (
               <div style={as.field}>
                 <label style={as.label}>Full name</label>
-                <input className="input" placeholder="Maya Abdelrahman" defaultValue="Maya Abdelrahman" />
+                <input className="input" placeholder="Your full name" value={name} onChange={e => setName(e.target.value)} />
               </div>
             )}
             <div style={as.field}>
               <label style={as.label}>Email</label>
-              <input className="input" placeholder="you@university.edu" defaultValue="maya@aucegypt.edu" />
+              <input className="input" placeholder="you@university.edu" value={email} onChange={e => setEmail(e.target.value)} />
             </div>
             <div style={as.field}>
               <label style={as.label}>Password</label>
-              <input className="input" type="password" defaultValue="••••••••••" />
+              <input className="input" type="password" placeholder="At least 8 characters" value={password} onChange={e => setPassword(e.target.value)} />
             </div>
           </div>
 
-          <button className="btn btn-primary" onClick={onComplete} style={{ marginTop: 20, padding: '12px 14px', justifyContent: 'center' }}>
-            {mode === 'signin' ? 'Continue' : 'Create account'} <Icon.ArrowRight size={14} />
+          {error && (
+            <div style={{ marginTop: 14, padding: '10px 12px', border: '1px solid var(--danger, #ef4444)', borderRadius: 'var(--r-sm)', color: 'var(--danger, #ef4444)', fontSize: 12 }}>
+              {error}
+            </div>
+          )}
+
+          <button className="btn btn-primary" onClick={submit} disabled={loading} style={{ marginTop: 20, padding: '12px 14px', justifyContent: 'center', opacity: loading ? 0.7 : 1 }}>
+            {loading ? 'Checking...' : (mode === 'signin' ? 'Continue' : 'Create account')} <Icon.ArrowRight size={14} />
           </button>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, margin: '20px 0', color: 'var(--fg-3)', fontSize: 11 }}>
             <span style={{ flex: 1, height: 1, background: 'var(--line)' }} /> or <span style={{ flex: 1, height: 1, background: 'var(--line)' }} />
           </div>
           <div style={{ display: 'flex', gap: 8 }}>
-            <button className="btn btn-ghost" style={{ flex: 1, justifyContent: 'center' }}>Google</button>
-            <button className="btn btn-ghost" style={{ flex: 1, justifyContent: 'center' }}>University SSO</button>
+            <button className="btn btn-ghost" disabled style={{ flex: 1, justifyContent: 'center', opacity: 0.45 }}>Google</button>
+            <button className="btn btn-ghost" disabled style={{ flex: 1, justifyContent: 'center', opacity: 0.45 }}>University SSO</button>
           </div>
 
           <div style={{ marginTop: 24, fontSize: 12.5, color: 'var(--fg-2)' }}>
             {mode === 'signin' ? "New here?" : "Already have an account?"}{' '}
-            <a onClick={() => setMode(mode === 'signin' ? 'signup' : 'signin')} style={{ color: 'var(--accent)', cursor: 'pointer' }}>
+            <a onClick={switchMode} style={{ color: 'var(--accent)', cursor: 'pointer' }}>
               {mode === 'signin' ? 'Create an account' : 'Sign in'}
             </a>
           </div>
@@ -99,7 +136,29 @@ const Onboarding = ({ onComplete }) => {
     { title: 'How much time per day?', sub: 'We\'ll pace your sessions around this.' },
   ];
 
-  const next = () => step < 3 ? setStep(step + 1) : onComplete();
+  const next = async () => {
+    if (step < 3) {
+      setStep(step + 1);
+      return;
+    }
+
+    await fetch('/api/onboarding', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        field: subject,
+        goal,
+        dailyMinutes: time,
+        courses: [
+          { id: 'oop', code: 'CSCI 2301', title: 'Object-Oriented Programming', term: 'Current semester' },
+          { id: 'ds', code: 'CSCI 3411', title: 'Data Structures & Algorithms', term: 'Current semester' },
+          { id: 'la', code: 'MATH 2101', title: 'Linear Algebra', term: 'Current semester' },
+          { id: 'dm', code: 'CSCI 2102', title: 'Discrete Mathematics', term: 'Current semester' },
+        ].filter((course) => courses.includes(course.id)).map(({ id, ...course }) => course),
+      }),
+    });
+    onComplete();
+  };
 
   return (
     <div style={os.page}>

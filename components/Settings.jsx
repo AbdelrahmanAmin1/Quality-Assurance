@@ -1,5 +1,5 @@
 // Settings and account management
-const Settings = ({ theme, setTheme, onLogout }) => {
+const Settings = ({ theme, setTheme, user, onLogout }) => {
   const Icon = window.Icon;
   const [tab, setTab] = React.useState('profile');
   const tabs = [
@@ -37,7 +37,7 @@ const Settings = ({ theme, setTheme, onLogout }) => {
           })}
         </aside>
         <main style={{ padding: '40px 56px', maxWidth: 820, width: '100%' }} key={tab} className="fade-in">
-          {tab === 'profile' && <ProfileTab/>}
+          {tab === 'profile' && <ProfileTab user={user}/>}
           {tab === 'learning' && <LearningTab/>}
           {tab === 'appearance' && <AppearanceTab theme={theme} setTheme={setTheme}/>}
           {tab === 'notifications' && <NotifTab/>}
@@ -58,23 +58,26 @@ const SetHeader = ({ eyebrow, title, sub }) => (
   </div>
 );
 
-const ProfileTab = () => {
+const ProfileTab = ({ user }) => {
   const Icon = window.Icon;
+  const displayName = user?.name || user?.email || 'Signed-in user';
+  const email = user?.email || 'Authenticated session';
+  const avatarLetter = displayName.trim().charAt(0).toUpperCase() || 'U';
   return (
     <>
       <SetHeader eyebrow="Profile" title="Your learning persona." sub="How NoÄ“sis addresses you and what it remembers across sessions."/>
       <div style={{ display: 'flex', alignItems: 'center', gap: 20, marginBottom: 28, padding: 20, border: '1px solid var(--line)', borderRadius: 'var(--r-lg)', background: 'var(--bg-1)' }}>
-        <div style={{ width: 64, height: 64, borderRadius: 16, background: 'linear-gradient(135deg, var(--accent), var(--parchment))', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-display)', fontSize: 28, color: 'var(--bg-0)' }}>M</div>
+        <div style={{ width: 64, height: 64, borderRadius: 16, background: 'linear-gradient(135deg, var(--accent), var(--parchment))', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-display)', fontSize: 28, color: 'var(--bg-0)' }}>{avatarLetter}</div>
         <div style={{ flex: 1 }}>
-          <div style={{ fontSize: 16, color: 'var(--fg-0)', fontWeight: 500 }}>Maya Abdelrahman</div>
-          <div style={{ fontSize: 12, color: 'var(--fg-2)', marginTop: 2 }}>maya.a@student.edu Â· CS Sophomore</div>
+          <div style={{ fontSize: 16, color: 'var(--fg-0)', fontWeight: 500 }}>{displayName}</div>
+          <div style={{ fontSize: 12, color: 'var(--fg-2)', marginTop: 2 }}>{email}</div>
         </div>
         <button className="btn btn-ghost">Change photo</button>
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
-        <SetRow label="Display name" sub="How the tutor addresses you."><input className="input" defaultValue="Maya" style={{ width: 220 }}/></SetRow>
-        <SetRow label="Major / focus" sub="Tailors what gets surfaced first."><input className="input" defaultValue="Computer Science" style={{ width: 220 }}/></SetRow>
-        <SetRow label="Time zone" sub="For scheduling and weekly reviews."><input className="input" defaultValue="Africa/Cairo (GMT+2)" style={{ width: 220 }}/></SetRow>
+        <SetRow label="Display name" sub="How the tutor addresses you."><input className="input" value={user?.name || ''} readOnly style={{ width: 220 }}/></SetRow>
+        <SetRow label="Email" sub="Used for authentication."><input className="input" value={user?.email || ''} readOnly style={{ width: 220 }}/></SetRow>
+        <SetRow label="Profile source" sub="Loaded from the authenticated backend session."><input className="input" value="Backend session" readOnly style={{ width: 220 }}/></SetRow>
       </div>
     </>
   );
