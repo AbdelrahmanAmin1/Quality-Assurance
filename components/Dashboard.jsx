@@ -13,7 +13,7 @@ const Dashboard = ({ onNav }) => {
       }}/>
       <window.Topbar
         title="Today"
-        crumbs={['Maya']}
+        crumbs={['Mahmoud']}
         right={<button className="btn btn-ghost"><Icon.Calendar size={13}/> Wednesday, Apr 22</button>}
       />
 
@@ -23,7 +23,7 @@ const Dashboard = ({ onNav }) => {
           <div>
             <div style={ds.eyebrow}>
               <span style={{ display: 'inline-block', width: 6, height: 6, borderRadius: 3, background: 'var(--accent)', marginRight: 8, boxShadow: '0 0 8px var(--accent)' }}/>
-              {greeting}, Maya
+              {greeting}, Mahmoud
             </div>
             <h1 style={ds.heroTitle}>
               Three concepts away from a <em style={{ fontStyle: 'italic', color: 'var(--accent)' }}>solid</em> Data Structures week.
