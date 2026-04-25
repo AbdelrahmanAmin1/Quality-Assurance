@@ -3,11 +3,11 @@ import { hashPassword } from "../lib/auth";
 
 async function main() {
   const user = await prisma.user.upsert({
-    where: { email: "maya@aucegypt.edu" },
+    where: { email: "noesisalpha1@gmail.com" },
     update: {},
     create: {
-      email: "maya@aucegypt.edu",
-      name: "Maya Abdelrahman",
+      email: "noesisalpha1@gmail.com",
+      name: "Mahmoud Walied",
       passwordHash: await hashPassword("password123"),
       profile: {
         create: {
