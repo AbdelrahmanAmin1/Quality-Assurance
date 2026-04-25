@@ -13,6 +13,9 @@ for (const model of ["User", "Session", "Material", "TutorSession", "Quiz", "Stu
 
 for (const path of [
   "../app/api/health/route.ts",
+  "../app/api/dashboard/route.ts",
+  "../app/api/progress/route.ts",
+  "../app/api/progress/snapshots/route.ts",
   "../lib/api.ts",
   "../lib/auth.ts",
   "../lib/prisma.ts",
