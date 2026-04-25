@@ -43,9 +43,11 @@ const SIDEBAR = [
   { key: 'collab', label: 'Study Rooms', icon: 'Users' },
 ];
 
-const Sidebar = ({ current, onNav, onSettings, onLogout, onHome }) => {
+const Sidebar = ({ current, user, onNav, onSettings, onLogout, onHome }) => {
   const Icon = window.Icon;
   const [menuOpen, setMenuOpen] = React.useState(false);
+  const displayName = user?.name || user?.email || 'Signed-in user';
+  const avatarLetter = displayName.trim().charAt(0).toUpperCase() || 'U';
   return (
     <aside style={ss.sidebar}>
       <div style={{ padding: '22px 22px 16px' }}>
@@ -98,10 +100,10 @@ const Sidebar = ({ current, onNav, onSettings, onLogout, onHome }) => {
         </button>
 
         <button onClick={() => setMenuOpen(v => !v)} style={ss.profile}>
-          <div style={ss.avatar}>M</div>
+          <div style={ss.avatar}>{avatarLetter}</div>
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', minWidth: 0, flex: 1 }}>
-            <span style={{ fontSize: 12, color: 'var(--fg-0)', fontWeight: 500, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: 130 }}>Mostafa Abdelaal</span>
-            <span style={{ fontSize: 10, color: 'var(--fg-3)' }}>CS · Sophomore</span>
+            <span style={{ fontSize: 12, color: 'var(--fg-0)', fontWeight: 500, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: 130 }}>{displayName}</span>
+            <span style={{ fontSize: 10, color: 'var(--fg-3)' }}>{user?.email || 'Authenticated session'}</span>
           </div>
           <Icon.ChevronRight size={14} style={{ color: 'var(--fg-3)', transform: menuOpen ? 'rotate(90deg)' : 'none', transition: 'transform 160ms var(--ease-out)' }} />
         </button>
