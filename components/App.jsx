@@ -6,6 +6,8 @@ const App = () => {
   const [prevRoute, setPrevRoute] = useState(null);
   const [theme, setTheme] = useState(localStorage.getItem('noesis.theme') || 'dark');
   const [tweaksOpen, setTweaksOpen] = useState(false);
+  const [currentUser, setCurrentUser] = useState(null);
+  const [authChecked, setAuthChecked] = useState(false);
   // Show splash only on fresh session (not on every route change). Skip if ?nosplash.
   const splashSeen = sessionStorage.getItem('noesis.splashSeen');
   const urlSkip = new URLSearchParams(window.location.search).has('nosplash');
@@ -17,6 +19,14 @@ const App = () => {
     document.documentElement.setAttribute('data-theme', theme);
     localStorage.setItem('noesis.theme', theme);
   }, [theme]);
+
+  useEffect(() => {
+    fetch('/api/auth/me')
+      .then(res => res.ok ? res.json() : null)
+      .then(result => setCurrentUser(result?.data?.user || null))
+      .catch(() => setCurrentUser(null))
+      .finally(() => setAuthChecked(true));
+  }, []);
 
   // Tweaks protocol
   useEffect(() => {
@@ -41,12 +51,31 @@ const App = () => {
     return () => window.removeEventListener('keydown', onKey);
   }, []);
 
+  const protectedRoutes = ['dashboard','materials','material','tutor','notes','flashcards','quiz','progress','collab','settings'];
+
+  useEffect(() => {
+    if (!authChecked) return;
+    if (!currentUser && protectedRoutes.includes(route)) {
+      setRoute('auth');
+    }
+  }, [authChecked, currentUser, route]);
+
   const goto = (r) => {
+    if (authChecked && !currentUser && protectedRoutes.includes(r)) {
+      setPrevRoute(route);
+      setRoute('auth');
+      return;
+    }
     setPrevRoute(route);
     setRoute(r);
     window.scrollTo({ top: 0, behavior: 'instant' });
   };
-  const logout = () => goto('landing');
+  const logout = async () => {
+    await fetch('/api/auth/logout', { method: 'POST' }).catch(() => {});
+    setCurrentUser(null);
+    localStorage.setItem('noesis.route', 'landing');
+    goto('landing');
+  };
   const home = () => goto('landing');
   const onSplashDone = () => {
     sessionStorage.setItem('noesis.splashSeen', '1');
@@ -64,7 +93,7 @@ const App = () => {
     students: <window.StudentsPage onEnter={goto}/>,
     method: <window.MethodPage onEnter={goto}/>,
     pricing: <window.PricingPage onEnter={goto}/>,
-    auth: <window.Auth onComplete={() => goto('onboarding')} onBack={() => goto('landing')}/>,
+    auth: <window.Auth onComplete={(user) => { setCurrentUser(user); goto('onboarding'); }} onBack={() => goto('landing')}/>,
     onboarding: <window.Onboarding onComplete={() => goto('dashboard')}/>,
     dashboard: <window.Dashboard onNav={goto}/>,
     materials: <window.Materials onNav={(r) => goto(r === 'material' ? 'material' : r)}/>,
@@ -75,8 +104,16 @@ const App = () => {
     quiz: <window.Quiz onNav={goto}/>,
     progress: <window.Progress onNav={goto}/>,
     collab: <window.Collab onNav={goto}/>,
-    settings: <window.Settings theme={theme} setTheme={setTheme} onLogout={logout}/>,
+    settings: <window.Settings theme={theme} setTheme={setTheme} user={currentUser} onLogout={logout}/>,
   };
+
+  if (!authChecked) {
+    return (
+      <div style={{ minHeight: '100vh', display: 'grid', placeItems: 'center', background: 'var(--bg-0)', color: 'var(--fg-1)', fontSize: 13 }}>
+        Checking session...
+      </div>
+    );
+  }
 
   return (
     <div data-screen-label={route} style={{ minHeight: '100vh', background: 'var(--bg-0)', position: 'relative' }}>
@@ -86,7 +123,7 @@ const App = () => {
       <div style={{ position: 'relative', zIndex: 1 }}>
         {showShell ? (
           <div style={{ display: 'flex' }}>
-            <window.Sidebar current={route} onNav={goto} onSettings={() => goto('settings')} onLogout={logout} onHome={home}/>
+            <window.Sidebar current={route} user={currentUser} onNav={goto} onSettings={() => goto('settings')} onLogout={logout} onHome={home}/>
             <div style={{ flex: 1, minWidth: 0 }}>
               <div key={route} className="route-in">{screens[route]}</div>
             </div>
