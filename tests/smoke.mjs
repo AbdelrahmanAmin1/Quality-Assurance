@@ -13,6 +13,10 @@ for (const model of ["User", "Session", "Material", "TutorSession", "Quiz", "Stu
 
 for (const path of [
   "../app/api/health/route.ts",
+  "../app/api/study-rooms/route.ts",
+  "../app/api/study-rooms/[id]/route.ts",
+  "../app/api/study-rooms/[id]/join/route.ts",
+  "../app/api/study-rooms/[id]/messages/route.ts",
   "../lib/api.ts",
   "../lib/auth.ts",
   "../lib/prisma.ts",
