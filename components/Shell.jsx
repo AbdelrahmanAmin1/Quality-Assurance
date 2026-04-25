@@ -100,7 +100,7 @@ const Sidebar = ({ current, onNav, onSettings, onLogout, onHome }) => {
         <button onClick={() => setMenuOpen(v => !v)} style={ss.profile}>
           <div style={ss.avatar}>M</div>
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', minWidth: 0, flex: 1 }}>
-            <span style={{ fontSize: 12, color: 'var(--fg-0)', fontWeight: 500, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: 130 }}>Maya Abdelrahman</span>
+            <span style={{ fontSize: 12, color: 'var(--fg-0)', fontWeight: 500, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: 130 }}>Mostafa Abdelaal</span>
             <span style={{ fontSize: 10, color: 'var(--fg-3)' }}>CS · Sophomore</span>
           </div>
           <Icon.ChevronRight size={14} style={{ color: 'var(--fg-3)', transform: menuOpen ? 'rotate(90deg)' : 'none', transition: 'transform 160ms var(--ease-out)' }} />
