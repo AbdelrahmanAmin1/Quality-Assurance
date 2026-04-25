@@ -23,10 +23,11 @@ export async function POST(request: Request) {
   const expiresAt = sessionExpiry();
   await prisma.session.create({ data: { userId: user.id, tokenHash: hashSessionToken(token), expiresAt } });
 
+  const isHttps = request.url.startsWith("https://") || request.headers.get("x-forwarded-proto") === "https";
   cookies().set(sessionCookieName, token, {
     httpOnly: true,
     sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
+    secure: isHttps,
     expires: expiresAt,
     path: "/"
   });

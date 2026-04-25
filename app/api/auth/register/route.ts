@@ -31,10 +31,11 @@ export async function POST(request: Request) {
     }
   });
 
+  const isHttps = request.url.startsWith("https://") || request.headers.get("x-forwarded-proto") === "https";
   cookies().set(sessionCookieName, token, {
     httpOnly: true,
     sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
+    secure: isHttps,
     expires: expiresAt,
     path: "/"
   });
