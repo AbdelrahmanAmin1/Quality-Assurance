@@ -49,13 +49,13 @@ const Sidebar = ({ current, user, onNav, onSettings, onLogout, onHome }) => {
   const displayName = user?.name || user?.email || 'Signed-in user';
   const avatarLetter = displayName.trim().charAt(0).toUpperCase() || 'U';
   return (
-    <aside style={ss.sidebar}>
+    <aside style={shellStyles.sidebar}>
       <div style={{ padding: '22px 22px 16px' }}>
         <Logo size={22} onClick={onHome}/>
       </div>
 
       <div style={{ padding: '6px 10px' }}>
-        <button style={ss.sbNewBtn} onClick={() => onNav('tutor')}>
+        <button style={shellStyles.sbNewBtn} onClick={() => onNav('tutor')}>
           <Icon.Plus size={14} />
           <span>New session</span>
           <span style={{ marginLeft: 'auto', fontSize: 10, color: 'var(--fg-3)' }} className="mono">Ctrl+K</span>
@@ -68,17 +68,17 @@ const Sidebar = ({ current, user, onNav, onSettings, onLogout, onHome }) => {
           const active = current === item.key;
           return (
             <button key={item.key} onClick={() => onNav(item.key)}
-              style={{ ...ss.sbItem, ...(active ? ss.sbItemActive : {}) }}>
+              style={{ ...shellStyles.sbItem, ...(active ? shellStyles.sbItemActive : {}) }}>
               <IconCmp size={16} />
               <span>{item.label}</span>
-              {active && <span style={ss.sbDot} />}
+              {active && <span style={shellStyles.sbDot} />}
             </button>
           );
         })}
       </nav>
 
       <div style={{ marginTop: 'auto', padding: '12px', position: 'relative' }}>
-        <div style={ss.streakBox}>
+        <div style={shellStyles.streakBox}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <span style={{ fontSize: 10, letterSpacing: '0.08em', color: 'var(--fg-3)', textTransform: 'uppercase' }}>Streak</span>
             <Icon.Flame size={12} style={{ color: 'var(--accent)' }}/>
@@ -94,13 +94,13 @@ const Sidebar = ({ current, user, onNav, onSettings, onLogout, onHome }) => {
           </div>
         </div>
 
-        <button onClick={onSettings} style={{ ...ss.sbItem, marginTop: 6 }}>
+        <button onClick={onSettings} style={{ ...shellStyles.sbItem, marginTop: 6 }}>
           <Icon.Cog size={16} />
           <span>Settings</span>
         </button>
 
-        <button onClick={() => setMenuOpen(v => !v)} style={ss.profile}>
-          <div style={ss.avatar}>{avatarLetter}</div>
+        <button onClick={() => setMenuOpen(v => !v)} style={shellStyles.profile}>
+          <div style={shellStyles.avatar}>{avatarLetter}</div>
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', minWidth: 0, flex: 1 }}>
             <span style={{ fontSize: 12, color: 'var(--fg-0)', fontWeight: 500, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: 130 }}>{displayName}</span>
             <span style={{ fontSize: 10, color: 'var(--fg-3)' }}>{user?.email || 'Authenticated session'}</span>
@@ -109,15 +109,15 @@ const Sidebar = ({ current, user, onNav, onSettings, onLogout, onHome }) => {
         </button>
 
         {menuOpen && (
-          <div style={ss.menu}>
-            <button style={ss.menuItem} onClick={() => { setMenuOpen(false); onSettings(); }}>
+          <div style={shellStyles.menu}>
+            <button style={shellStyles.menuItem} onClick={() => { setMenuOpen(false); onSettings(); }}>
               <Icon.Users size={13}/> Profile
             </button>
-            <button style={ss.menuItem} onClick={() => { setMenuOpen(false); onSettings(); }}>
+            <button style={shellStyles.menuItem} onClick={() => { setMenuOpen(false); onSettings(); }}>
               <Icon.Eye size={13}/> Appearance
             </button>
             <div style={{ height: 1, background: 'var(--line)', margin: '4px 0' }}/>
-            <button style={{ ...ss.menuItem, color: 'var(--err)' }} onClick={() => { setMenuOpen(false); onLogout && onLogout(); }}>
+            <button style={{ ...shellStyles.menuItem, color: 'var(--err)' }} onClick={() => { setMenuOpen(false); onLogout && onLogout(); }}>
               <Icon.LogOut size={13}/> Log out
             </button>
           </div>
@@ -127,29 +127,34 @@ const Sidebar = ({ current, user, onNav, onSettings, onLogout, onHome }) => {
   );
 };
 
-const ss = {
+const shellStyles = {
   sidebar: {
     width: 240, background: 'var(--bg-1)',
     borderRight: '1px solid var(--line)',
     display: 'flex', flexDirection: 'column',
     height: '100vh', position: 'sticky', top: 0,
     flexShrink: 0,
+    overflow: 'hidden',
   },
   sbNewBtn: {
-    display: 'flex', alignItems: 'center', gap: 10,
+    display: 'flex', alignItems: 'center', justifyContent: 'flex-start', gap: 10,
     width: '100%', padding: '8px 12px',
     borderRadius: 'var(--r-md)',
     background: 'var(--bg-2)', border: '1px solid var(--line)',
     color: 'var(--fg-1)', fontSize: 12.5,
     transition: 'all 160ms var(--ease-out)',
+    textAlign: 'left',
+    minHeight: 36,
   },
   sbItem: {
-    display: 'flex', alignItems: 'center', gap: 10,
+    display: 'flex', alignItems: 'center', justifyContent: 'flex-start', gap: 10,
     width: '100%', padding: '7px 10px',
     borderRadius: 'var(--r-sm)',
     color: 'var(--fg-2)', fontSize: 13,
     transition: 'all 140ms var(--ease-out)',
     position: 'relative',
+    textAlign: 'left',
+    minHeight: 32,
   },
   sbItemActive: {
     background: 'var(--bg-2)', color: 'var(--fg-0)',
@@ -166,12 +171,14 @@ const ss = {
     color: 'var(--fg-1)',
   },
   profile: {
-    display: 'flex', alignItems: 'center', gap: 10,
+    display: 'flex', alignItems: 'center', justifyContent: 'flex-start', gap: 10,
     width: '100%', padding: '8px',
     borderRadius: 'var(--r-md)',
     background: 'transparent',
     marginTop: 4,
     transition: 'background 140ms var(--ease-out)',
+    textAlign: 'left',
+    minHeight: 44,
   },
   avatar: {
     width: 28, height: 28, borderRadius: 8,
