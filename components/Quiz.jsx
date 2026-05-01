@@ -8,6 +8,8 @@ const Quiz = ({ onNav }) => {
   const [loading, setLoading] = React.useState(true);
   const [saving, setSaving] = React.useState(false);
   const [error, setError] = React.useState("");
+  const [quizDialogOpen, setQuizDialogOpen] = React.useState(false);
+  const [quizDraft, setQuizDraft] = React.useState({ title: "" });
 
   const load = React.useCallback(async () => {
     setLoading(true);
@@ -30,20 +32,21 @@ const Quiz = ({ onNav }) => {
 
   const createQuiz = async () => {
     const materialId = localStorage.getItem("noesis.materialId") || undefined;
-    const title = window.prompt("Quiz title");
-    if (!title?.trim()) return;
+    if (!quizDraft.title.trim()) return;
     setSaving(true);
     setError("");
     try {
       await Api.post("/api/quizzes", {
         materialId,
-        title: title.trim(),
+        title: quizDraft.title.trim(),
         questions: [{
           prompt: "What is the main idea to remember?",
           answer: "key idea",
           choices: ["key idea", "unrelated detail", "skip it"],
         }],
       });
+      setQuizDialogOpen(false);
+      setQuizDraft({ title: "" });
       await load();
     } catch (err) {
       setError(err.message || "Could not create quiz.");
@@ -91,7 +94,7 @@ const Quiz = ({ onNav }) => {
       <window.Topbar title={quiz?.title || "Quizzes"} crumbs={["Assessment"]}
         right={<>
           <span style={{ fontSize: 11.5, color: "var(--fg-3)" }}>{questions.length} questions</span>
-          <button className="btn btn-accent" onClick={createQuiz} disabled={saving}><Icon.Plus size={12}/> New quiz</button>
+          <button className="btn btn-accent" onClick={() => setQuizDialogOpen(true)} disabled={saving}><Icon.Plus size={12}/> New quiz</button>
         </>}
       />
       <div style={qz.layout}>
@@ -112,7 +115,7 @@ const Quiz = ({ onNav }) => {
             <div className="card" style={qz.emptyCard}>
               <Icon.Target size={30} style={{ color: "var(--accent)" }}/>
               <div style={{ fontSize: 20, color: "var(--fg-0)", marginTop: 12 }}>No quiz available</div>
-              <button className="btn btn-accent" onClick={createQuiz} disabled={saving} style={{ marginTop: 16 }}><Icon.Plus size={12}/> Create quiz</button>
+              <button className="btn btn-accent" onClick={() => setQuizDialogOpen(true)} disabled={saving} style={{ marginTop: 16 }}><Icon.Plus size={12}/> Create quiz</button>
             </div>
           )}
           {quiz && (
@@ -174,6 +177,18 @@ const Quiz = ({ onNav }) => {
           )}
         </main>
       </div>
+      <window.FieldDialog
+        open={quizDialogOpen}
+        title="Create quiz"
+        description="Create a backend quiz record with a starter question."
+        fields={[{ name: "title", label: "Quiz title", placeholder: "Backend quiz" }]}
+        values={quizDraft}
+        onChange={setQuizDraft}
+        onCancel={() => setQuizDialogOpen(false)}
+        onSubmit={createQuiz}
+        submitLabel="Create quiz"
+        busy={saving}
+      />
     </div>
   );
 };

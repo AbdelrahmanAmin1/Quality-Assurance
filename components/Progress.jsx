@@ -6,6 +6,8 @@ const Progress = ({ onNav }) => {
   const [loading, setLoading] = React.useState(true);
   const [saving, setSaving] = React.useState(false);
   const [error, setError] = React.useState("");
+  const [progressDialogOpen, setProgressDialogOpen] = React.useState(false);
+  const [progressDraft, setProgressDraft] = React.useState({ minutes: "25" });
 
   const load = React.useCallback(async () => {
     setLoading(true);
@@ -27,7 +29,7 @@ const Progress = ({ onNav }) => {
   React.useEffect(() => { load(); }, [load]);
 
   const logToday = async () => {
-    const minutes = Number(window.prompt("Minutes studied today", "25"));
+    const minutes = Number(progressDraft.minutes);
     if (!Number.isFinite(minutes) || minutes < 0) return;
     setSaving(true);
     setError("");
@@ -38,6 +40,8 @@ const Progress = ({ onNav }) => {
         cardsReviewed: dashboard?.cardsReviewedThisWeek || 0,
         quizzesTaken: data.recentAttempts?.length || 0,
       });
+      setProgressDialogOpen(false);
+      setProgressDraft({ minutes: "25" });
       await load();
     } catch (err) {
       setError(err.message || "Could not save progress.");
@@ -59,7 +63,7 @@ const Progress = ({ onNav }) => {
       <window.Topbar title="Progress" crumbs={["Analytics"]}
         right={<>
           <button className="btn btn-ghost" onClick={load} disabled={loading}>Last 90 days <Icon.ChevronDown size={11}/></button>
-          <button className="btn btn-accent" onClick={logToday} disabled={saving}><Icon.Plus size={12}/> Log today</button>
+          <button className="btn btn-accent" onClick={() => setProgressDialogOpen(true)} disabled={saving}><Icon.Plus size={12}/> Log today</button>
         </>}
       />
       <div style={ps.page}>
@@ -129,6 +133,18 @@ const Progress = ({ onNav }) => {
           </>
         )}
       </div>
+      <window.FieldDialog
+        open={progressDialogOpen}
+        title="Log study time"
+        description="Save today's study minutes as a backend progress snapshot."
+        fields={[{ name: "minutes", label: "Minutes studied", type: "number", min: 0, max: 1440, step: 1 }]}
+        values={progressDraft}
+        onChange={setProgressDraft}
+        onCancel={() => setProgressDialogOpen(false)}
+        onSubmit={logToday}
+        submitLabel="Log progress"
+        busy={saving}
+      />
     </div>
   );
 };

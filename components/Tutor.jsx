@@ -9,6 +9,8 @@ const Tutor = ({ onNav }) => {
   const [loading, setLoading] = React.useState(true);
   const [sending, setSending] = React.useState(false);
   const [error, setError] = React.useState("");
+  const [sessionDialogOpen, setSessionDialogOpen] = React.useState(false);
+  const [sessionDraft, setSessionDraft] = React.useState({ topic: "" });
 
   const loadSessions = React.useCallback(async () => {
     setLoading(true);
@@ -36,16 +38,18 @@ const Tutor = ({ onNav }) => {
   React.useEffect(() => { loadSessions(); }, [loadSessions]);
 
   const createSession = async () => {
-    const topic = window.prompt("Tutor session topic");
-    if (!topic?.trim()) return;
+    if (!sessionDraft.topic.trim()) return;
     setSending(true);
     setError("");
     try {
+      const topic = sessionDraft.topic.trim();
       const result = await Api.post("/api/tutor/sessions", {
-        topic: topic.trim(),
-        openingPrompt: `Help me study ${topic.trim()} in ${mode} mode.`,
+        topic,
+        openingPrompt: `Help me study ${topic} in ${mode} mode.`,
       });
       setActiveId(result.session.id);
+      setSessionDialogOpen(false);
+      setSessionDraft({ topic: "" });
       await loadSessions();
     } catch (err) {
       setError(err.message || "Could not create tutor session.");
@@ -114,7 +118,7 @@ const Tutor = ({ onNav }) => {
               );
             })}
           </div>
-          <button className="btn btn-accent" onClick={createSession} disabled={sending}><Icon.Plus size={12}/> New</button>
+          <button className="btn btn-accent" onClick={() => setSessionDialogOpen(true)} disabled={sending}><Icon.Plus size={12}/> New</button>
         </>}
       />
 
@@ -153,7 +157,7 @@ const Tutor = ({ onNav }) => {
                 <Icon.Sparkle size={28} style={{ color: "var(--accent)" }}/>
                 <div style={{ fontSize: 20, color: "var(--fg-0)", marginTop: 12 }}>No tutor session selected</div>
                 <div style={{ fontSize: 12.5, color: "var(--fg-2)", marginTop: 6 }}>Sessions and messages are stored through the backend API.</div>
-                <button className="btn btn-accent" onClick={createSession} disabled={sending} style={{ marginTop: 16 }}><Icon.Plus size={12}/> Start session</button>
+                <button className="btn btn-accent" onClick={() => setSessionDialogOpen(true)} disabled={sending} style={{ marginTop: 16 }}><Icon.Plus size={12}/> Start session</button>
               </div>
             ) : (
               <>
@@ -203,6 +207,18 @@ const Tutor = ({ onNav }) => {
           </div>
         </aside>
       </div>
+      <window.FieldDialog
+        open={sessionDialogOpen}
+        title="Start tutor session"
+        description="Name the topic for the backend tutor session."
+        fields={[{ name: "topic", label: "Topic", placeholder: "Backend integration" }]}
+        values={sessionDraft}
+        onChange={setSessionDraft}
+        onCancel={() => setSessionDialogOpen(false)}
+        onSubmit={createSession}
+        submitLabel="Start session"
+        busy={sending}
+      />
     </div>
   );
 };

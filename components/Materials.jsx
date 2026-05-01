@@ -7,6 +7,8 @@ const Materials = ({ onNav }) => {
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState("");
   const [saving, setSaving] = React.useState(false);
+  const [materialDialogOpen, setMaterialDialogOpen] = React.useState(false);
+  const [materialDraft, setMaterialDraft] = React.useState({ title: "", summary: "" });
   const fileRef = React.useRef(null);
 
   const load = React.useCallback(async () => {
@@ -56,18 +58,19 @@ const Materials = ({ onNav }) => {
   };
 
   const createManualMaterial = async () => {
-    const title = window.prompt("Material title");
-    if (!title?.trim()) return;
+    if (!materialDraft.title.trim()) return;
     setSaving(true);
     setError("");
     try {
       const result = await Api.post("/api/materials", {
-        title: title.trim(),
+        title: materialDraft.title.trim(),
         type: "note",
         courseId: courses[0]?.id,
-        summary: "Created from the materials workspace.",
+        summary: materialDraft.summary.trim() || "Created from the materials workspace.",
       });
       localStorage.setItem("noesis.materialId", result.material.id);
+      setMaterialDialogOpen(false);
+      setMaterialDraft({ title: "", summary: "" });
       await load();
       onNav("material");
     } catch (err) {
@@ -116,7 +119,7 @@ const Materials = ({ onNav }) => {
             </div>
           </div>
           <div style={{ display: "flex", gap: 8 }}>
-            <button className="btn btn-ghost" onClick={createManualMaterial} disabled={saving}><Icon.Plus size={12}/> Manual</button>
+            <button className="btn btn-ghost" onClick={() => setMaterialDialogOpen(true)} disabled={saving}><Icon.Plus size={12}/> Manual</button>
             <button className="btn btn-ghost" onClick={() => fileRef.current?.click()} disabled={saving}>Choose file</button>
           </div>
         </div>
@@ -128,7 +131,7 @@ const Materials = ({ onNav }) => {
             <Icon.File size={28} style={{ color: "var(--accent)" }}/>
             <div style={{ fontSize: 18, color: "var(--fg-0)", marginTop: 12 }}>No materials yet</div>
             <div style={{ fontSize: 12.5, color: "var(--fg-2)", marginTop: 6 }}>Create one to unlock notes, flashcards, quizzes, and progress tracking.</div>
-            <button className="btn btn-accent" onClick={createManualMaterial} style={{ marginTop: 16 }}><Icon.Plus size={12}/> Add material</button>
+            <button className="btn btn-accent" onClick={() => setMaterialDialogOpen(true)} style={{ marginTop: 16 }}><Icon.Plus size={12}/> Add material</button>
           </div>
         )}
 
@@ -163,6 +166,21 @@ const Materials = ({ onNav }) => {
           </div>
         )}
       </div>
+      <window.FieldDialog
+        open={materialDialogOpen}
+        title="Add material"
+        description="Create a backend material record without using a browser popup."
+        fields={[
+          { name: "title", label: "Title", placeholder: "Backend integration notes" },
+          { name: "summary", label: "Summary", placeholder: "What this material covers", type: "textarea", required: false },
+        ]}
+        values={materialDraft}
+        onChange={setMaterialDraft}
+        onCancel={() => setMaterialDialogOpen(false)}
+        onSubmit={createManualMaterial}
+        submitLabel="Create material"
+        busy={saving}
+      />
     </div>
   );
 };

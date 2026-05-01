@@ -7,6 +7,8 @@ const Flashcards = ({ onNav }) => {
   const [loading, setLoading] = React.useState(true);
   const [saving, setSaving] = React.useState(false);
   const [error, setError] = React.useState("");
+  const [cardDialogOpen, setCardDialogOpen] = React.useState(false);
+  const [cardDraft, setCardDraft] = React.useState({ prompt: "", answer: "", concept: "" });
 
   const load = React.useCallback(async () => {
     setLoading(true);
@@ -27,19 +29,18 @@ const Flashcards = ({ onNav }) => {
 
   const createCard = async () => {
     const materialId = localStorage.getItem("noesis.materialId") || undefined;
-    const prompt = window.prompt("Flashcard prompt");
-    if (!prompt?.trim()) return;
-    const answer = window.prompt("Flashcard answer");
-    if (!answer?.trim()) return;
+    if (!cardDraft.prompt.trim() || !cardDraft.answer.trim()) return;
     setSaving(true);
     setError("");
     try {
       await Api.post("/api/flashcards", {
         materialId,
-        prompt: prompt.trim(),
-        answer: answer.trim(),
-        concept: prompt.trim().slice(0, 120),
+        prompt: cardDraft.prompt.trim(),
+        answer: cardDraft.answer.trim(),
+        concept: (cardDraft.concept.trim() || cardDraft.prompt.trim()).slice(0, 120),
       });
+      setCardDialogOpen(false);
+      setCardDraft({ prompt: "", answer: "", concept: "" });
       await load();
     } catch (err) {
       setError(err.message || "Could not create flashcard.");
@@ -72,7 +73,7 @@ const Flashcards = ({ onNav }) => {
       <window.Topbar title="Flashcards" crumbs={["Review"]}
         right={<>
           <span style={{ fontSize: 11, color: "var(--fg-3)" }} className="mono">{cards.length ? i + 1 : 0} / {cards.length}</span>
-          <button className="btn btn-accent" onClick={createCard} disabled={saving}><Icon.Plus size={12}/> New card</button>
+          <button className="btn btn-accent" onClick={() => setCardDialogOpen(true)} disabled={saving}><Icon.Plus size={12}/> New card</button>
         </>}
       />
       <div style={{ flex: 1, display: "flex", flexDirection: "column" }}>
@@ -83,7 +84,7 @@ const Flashcards = ({ onNav }) => {
             <Icon.Cards size={30} style={{ color: "var(--accent)" }}/>
             <div style={{ fontSize: 20, color: "var(--fg-0)", marginTop: 12 }}>No flashcards yet</div>
             <div style={{ fontSize: 12.5, color: "var(--fg-2)", marginTop: 6 }}>Create cards from a material or add one manually.</div>
-            <button className="btn btn-accent" onClick={createCard} disabled={saving} style={{ marginTop: 16 }}><Icon.Plus size={12}/> Add card</button>
+            <button className="btn btn-accent" onClick={() => setCardDialogOpen(true)} disabled={saving} style={{ marginTop: 16 }}><Icon.Plus size={12}/> Add card</button>
           </div>
         )}
         {!loading && c && (
@@ -141,6 +142,22 @@ const Flashcards = ({ onNav }) => {
           </>
         )}
       </div>
+      <window.FieldDialog
+        open={cardDialogOpen}
+        title="Add flashcard"
+        description="Create a flashcard through the backend assessment API."
+        fields={[
+          { name: "prompt", label: "Prompt", placeholder: "What stores materials?" },
+          { name: "answer", label: "Answer", placeholder: "The backend API", type: "textarea" },
+          { name: "concept", label: "Concept", placeholder: "Backend", required: false },
+        ]}
+        values={cardDraft}
+        onChange={setCardDraft}
+        onCancel={() => setCardDialogOpen(false)}
+        onSubmit={createCard}
+        submitLabel="Create card"
+        busy={saving}
+      />
     </div>
   );
 };

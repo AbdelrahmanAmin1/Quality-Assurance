@@ -126,6 +126,8 @@ const Onboarding = ({ onComplete }) => {
   const [step, setStep] = React.useState(0);
   const [subject, setSubject] = React.useState('cs');
   const [courses, setCourses] = React.useState([]);
+  const [courseDialogOpen, setCourseDialogOpen] = React.useState(false);
+  const [courseDraft, setCourseDraft] = React.useState({ code: '', title: '', term: 'Current semester' });
   const [goal, setGoal] = React.useState('exams');
   const [time, setTime] = React.useState(45);
 
@@ -137,12 +139,14 @@ const Onboarding = ({ onComplete }) => {
   ];
 
   const addCourse = () => {
-    const code = window.prompt('Course code');
-    if (!code?.trim()) return;
-    const title = window.prompt('Course title');
-    if (!title?.trim()) return;
-    const term = window.prompt('Term', 'Current semester') || '';
-    setCourses([...courses, { code: code.trim(), title: title.trim(), term: term.trim() }]);
+    if (!courseDraft.code.trim() || !courseDraft.title.trim()) return;
+    setCourses([...courses, {
+      code: courseDraft.code.trim(),
+      title: courseDraft.title.trim(),
+      term: courseDraft.term.trim()
+    }]);
+    setCourseDraft({ code: '', title: '', term: 'Current semester' });
+    setCourseDialogOpen(false);
   };
 
   const removeCourse = (code) => {
@@ -227,7 +231,7 @@ const Onboarding = ({ onComplete }) => {
                     <Icon.X size={12} style={{ color: 'var(--fg-3)' }}/>
                   </button>
                 ))}
-                <button onClick={addCourse} style={{ ...os.course, border: '1px dashed var(--line-strong)', color: 'var(--fg-3)', justifyContent: 'center' }}>
+                <button onClick={() => setCourseDialogOpen(true)} style={{ ...os.course, border: '1px dashed var(--line-strong)', color: 'var(--fg-3)', justifyContent: 'center' }}>
                   <Icon.Plus size={14}/> Add another
                 </button>
               </div>
@@ -286,6 +290,21 @@ const Onboarding = ({ onComplete }) => {
           </div>
         </div>
       </main>
+      <window.FieldDialog
+        open={courseDialogOpen}
+        title="Add course"
+        description="Create a course that will be sent to the onboarding backend."
+        fields={[
+          { name: 'code', label: 'Course code', placeholder: 'QA101' },
+          { name: 'title', label: 'Course title', placeholder: 'Quality Assurance' },
+          { name: 'term', label: 'Term', placeholder: 'Current semester', required: false },
+        ]}
+        values={courseDraft}
+        onChange={setCourseDraft}
+        onCancel={() => setCourseDialogOpen(false)}
+        onSubmit={addCourse}
+        submitLabel="Add course"
+      />
     </div>
   );
 };

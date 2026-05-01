@@ -1,4 +1,4 @@
-// Logo: uses brand mark; 'ō' glyph in galaxy lens
+// Logo: uses brand mark in galaxy lens
 const Logo = ({ size = 24, showWord = true, onClick }) => (
   <button
     onClick={onClick}
@@ -25,7 +25,7 @@ const Logo = ({ size = 24, showWord = true, onClick }) => (
         fontFamily: 'var(--font-display)', fontSize: size * 0.82,
         letterSpacing: '-0.015em', fontWeight: 400,
       }}>
-        Noēsis
+        Noesis
       </span>
     )}
   </button>
@@ -58,7 +58,7 @@ const Sidebar = ({ current, user, onNav, onSettings, onLogout, onHome }) => {
         <button style={ss.sbNewBtn} onClick={() => onNav('tutor')}>
           <Icon.Plus size={14} />
           <span>New session</span>
-          <span style={{ marginLeft: 'auto', fontSize: 10, color: 'var(--fg-3)' }} className="mono">⌘K</span>
+          <span style={{ marginLeft: 'auto', fontSize: 10, color: 'var(--fg-3)' }} className="mono">Ctrl+K</span>
         </button>
       </div>
 

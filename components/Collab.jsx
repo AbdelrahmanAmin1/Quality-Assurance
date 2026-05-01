@@ -8,6 +8,8 @@ const Collab = ({ onNav }) => {
   const [loading, setLoading] = React.useState(true);
   const [saving, setSaving] = React.useState(false);
   const [error, setError] = React.useState("");
+  const [roomDialogOpen, setRoomDialogOpen] = React.useState(false);
+  const [roomDraft, setRoomDraft] = React.useState({ name: "", topic: "Study session" });
 
   const load = React.useCallback(async () => {
     setLoading(true);
@@ -35,13 +37,16 @@ const Collab = ({ onNav }) => {
   React.useEffect(() => { load(); }, [load]);
 
   const createRoom = async () => {
-    const name = window.prompt("Study room name");
-    if (!name?.trim()) return;
-    const topic = window.prompt("Topic", "Study session");
+    if (!roomDraft.name.trim()) return;
     setSaving(true);
     setError("");
     try {
-      const result = await Api.post("/api/study-rooms", { name: name.trim(), topic: topic?.trim() || undefined });
+      const result = await Api.post("/api/study-rooms", {
+        name: roomDraft.name.trim(),
+        topic: roomDraft.topic.trim() || undefined
+      });
+      setRoomDialogOpen(false);
+      setRoomDraft({ name: "", topic: "Study session" });
       await loadRoom(result.room.id);
       await load();
     } catch (err) {
@@ -111,7 +116,7 @@ const Collab = ({ onNav }) => {
             ))}
           </div>
           <button className="btn btn-ghost" onClick={load} disabled={loading}><Icon.Clock size={12}/> Refresh</button>
-          <button className="btn btn-accent" onClick={createRoom} disabled={saving}><Icon.Plus size={12}/> New room</button>
+          <button className="btn btn-accent" onClick={() => setRoomDialogOpen(true)} disabled={saving}><Icon.Plus size={12}/> New room</button>
         </>}
       />
       <div style={co.layout}>
@@ -152,7 +157,7 @@ const Collab = ({ onNav }) => {
             <div className="card" style={co.emptyCard}>
               <Icon.Users size={30} style={{ color: "var(--accent)" }}/>
               <div style={{ fontSize: 20, color: "var(--fg-0)", marginTop: 12 }}>No study room selected</div>
-              <button className="btn btn-accent" onClick={createRoom} disabled={saving} style={{ marginTop: 16 }}><Icon.Plus size={12}/> Create room</button>
+              <button className="btn btn-accent" onClick={() => setRoomDialogOpen(true)} disabled={saving} style={{ marginTop: 16 }}><Icon.Plus size={12}/> Create room</button>
             </div>
           ) : (
             <>
@@ -206,6 +211,21 @@ const Collab = ({ onNav }) => {
           </div>
         </aside>
       </div>
+      <window.FieldDialog
+        open={roomDialogOpen}
+        title="Create study room"
+        description="Create a backend collaboration room from an in-page form."
+        fields={[
+          { name: "name", label: "Room name", placeholder: "Phase 3 Room" },
+          { name: "topic", label: "Topic", placeholder: "Backend verification", required: false },
+        ]}
+        values={roomDraft}
+        onChange={setRoomDraft}
+        onCancel={() => setRoomDialogOpen(false)}
+        onSubmit={createRoom}
+        submitLabel="Create room"
+        busy={saving}
+      />
     </div>
   );
 };
