@@ -125,7 +125,9 @@ const Onboarding = ({ onComplete }) => {
   const Icon = window.Icon;
   const [step, setStep] = React.useState(0);
   const [subject, setSubject] = React.useState('cs');
-  const [courses, setCourses] = React.useState(['oop', 'ds']);
+  const [courses, setCourses] = React.useState([]);
+  const [courseDialogOpen, setCourseDialogOpen] = React.useState(false);
+  const [courseDraft, setCourseDraft] = React.useState({ code: '', title: '', term: 'Current semester' });
   const [goal, setGoal] = React.useState('exams');
   const [time, setTime] = React.useState(45);
 
@@ -135,6 +137,21 @@ const Onboarding = ({ onComplete }) => {
     { title: 'What\'s the goal?', sub: 'This shapes your weekly plan and notifications.' },
     { title: 'How much time per day?', sub: 'We\'ll pace your sessions around this.' },
   ];
+
+  const addCourse = () => {
+    if (!courseDraft.code.trim() || !courseDraft.title.trim()) return;
+    setCourses([...courses, {
+      code: courseDraft.code.trim(),
+      title: courseDraft.title.trim(),
+      term: courseDraft.term.trim()
+    }]);
+    setCourseDraft({ code: '', title: '', term: 'Current semester' });
+    setCourseDialogOpen(false);
+  };
+
+  const removeCourse = (code) => {
+    setCourses(courses.filter(course => course.code !== code));
+  };
 
   const next = async () => {
     if (step < 3) {
@@ -149,12 +166,7 @@ const Onboarding = ({ onComplete }) => {
         field: subject,
         goal,
         dailyMinutes: time,
-        courses: [
-          { id: 'oop', code: 'CSCI 2301', title: 'Object-Oriented Programming', term: 'Current semester' },
-          { id: 'ds', code: 'CSCI 3411', title: 'Data Structures & Algorithms', term: 'Current semester' },
-          { id: 'la', code: 'MATH 2101', title: 'Linear Algebra', term: 'Current semester' },
-          { id: 'dm', code: 'CSCI 2102', title: 'Discrete Mathematics', term: 'Current semester' },
-        ].filter((course) => courses.includes(course.id)).map(({ id, ...course }) => course),
+        courses,
       }),
     });
     onComplete();
@@ -207,27 +219,19 @@ const Onboarding = ({ onComplete }) => {
 
             {step === 1 && (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                {[
-                  { id: 'oop', label: 'CSCI 2301 · Object-Oriented Programming', prof: 'Dr. Farag · TR 11:00' },
-                  { id: 'ds', label: 'CSCI 3411 · Data Structures & Algorithms', prof: 'Dr. Samy · MW 14:30' },
-                  { id: 'la', label: 'MATH 2101 · Linear Algebra', prof: 'Dr. Hossam · MWF 09:00' },
-                  { id: 'dm', label: 'CSCI 2102 · Discrete Mathematics', prof: 'Dr. Khaled · TR 08:30' },
-                ].map(c => {
-                  const on = courses.includes(c.id);
-                  return (
-                    <button key={c.id} onClick={() => setCourses(on ? courses.filter(x => x !== c.id) : [...courses, c.id])}
-                      style={{ ...os.course, ...(on ? os.courseActive : {}) }}>
-                      <div style={{ ...os.check, background: on ? 'var(--accent)' : 'transparent', borderColor: on ? 'var(--accent)' : 'var(--line-strong)' }}>
-                        {on && <Icon.Check size={10} style={{ color: 'var(--bg-0)' }}/>}
-                      </div>
-                      <div style={{ textAlign: 'left', flex: 1 }}>
-                        <div style={{ fontSize: 13, color: 'var(--fg-0)', fontWeight: 500 }}>{c.label}</div>
-                        <div style={{ fontSize: 11.5, color: 'var(--fg-3)', marginTop: 2 }}>{c.prof}</div>
-                      </div>
-                    </button>
-                  );
-                })}
-                <button style={{ ...os.course, border: '1px dashed var(--line-strong)', color: 'var(--fg-3)', justifyContent: 'center' }}>
+                {courses.map(c => (
+                  <button key={c.code} onClick={() => removeCourse(c.code)} style={{ ...os.course, ...os.courseActive }}>
+                    <div style={{ ...os.check, background: 'var(--accent)', borderColor: 'var(--accent)' }}>
+                      <Icon.Check size={10} style={{ color: 'var(--bg-0)' }}/>
+                    </div>
+                    <div style={{ textAlign: 'left', flex: 1 }}>
+                      <div style={{ fontSize: 13, color: 'var(--fg-0)', fontWeight: 500 }}>{c.code} · {c.title}</div>
+                      <div style={{ fontSize: 11.5, color: 'var(--fg-3)', marginTop: 2 }}>{c.term || 'No term set'}</div>
+                    </div>
+                    <Icon.X size={12} style={{ color: 'var(--fg-3)' }}/>
+                  </button>
+                ))}
+                <button onClick={() => setCourseDialogOpen(true)} style={{ ...os.course, border: '1px dashed var(--line-strong)', color: 'var(--fg-3)', justifyContent: 'center' }}>
                   <Icon.Plus size={14}/> Add another
                 </button>
               </div>
@@ -286,6 +290,21 @@ const Onboarding = ({ onComplete }) => {
           </div>
         </div>
       </main>
+      <window.FieldDialog
+        open={courseDialogOpen}
+        title="Add course"
+        description="Create a course that will be sent to the onboarding backend."
+        fields={[
+          { name: 'code', label: 'Course code', placeholder: 'QA101' },
+          { name: 'title', label: 'Course title', placeholder: 'Quality Assurance' },
+          { name: 'term', label: 'Term', placeholder: 'Current semester', required: false },
+        ]}
+        values={courseDraft}
+        onChange={setCourseDraft}
+        onCancel={() => setCourseDialogOpen(false)}
+        onSubmit={addCourse}
+        submitLabel="Add course"
+      />
     </div>
   );
 };

@@ -2,7 +2,7 @@ import { z } from "zod";
 import { created, fail, readJson } from "@/lib/api";
 import { requireUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { stubMaterialExtraction } from "@/lib/stubs";
+import { extractMaterialMetadata } from "@/lib/learning-services";
 
 const extractSchema = z.object({
   filename: z.string().trim().min(1).max(240),
@@ -16,8 +16,8 @@ export async function POST(request: Request) {
 
   try {
     const user = await requireUser();
-    const extraction = stubMaterialExtraction(parsed.data.filename);
     const type = parsed.data.type ?? "pdf";
+    const extraction = extractMaterialMetadata(parsed.data.filename, type);
     const material = await prisma.material.create({
       data: {
         userId: user.id,

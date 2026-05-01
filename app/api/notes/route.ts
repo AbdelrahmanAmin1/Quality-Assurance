@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { created, fail, ok, readJson } from "@/lib/api";
 import { requireUser } from "@/lib/auth";
+import { serializeTags } from "@/lib/notes-utils";
 import { prisma } from "@/lib/prisma";
 
 const noteSchema = z.object({
@@ -40,7 +41,7 @@ export async function POST(request: Request) {
         materialId: parsed.data.materialId,
         title: parsed.data.title,
         body: parsed.data.body,
-        tags: JSON.stringify(parsed.data.tags)
+        tags: serializeTags(parsed.data.tags)
       }
     });
     return created({ note });

@@ -19,7 +19,7 @@ The repository started as an exported HTML/CSS/React prototype. Backend work has
 - SQLite for local MVP development
 - Zod request validation
 - HTTP-only cookie sessions
-- Deterministic stub services for AI/material extraction until production providers are configured
+- Backend service functions for local tutor replies and material metadata processing
 
 ## Feature Branches
 
@@ -27,8 +27,8 @@ The repository started as an exported HTML/CSS/React prototype. Backend work has
 | --- | --- | --- |
 | `noesis-backend-foundation` | Shared app scaffold, Prisma schema, API helpers, auth utilities, smoke checks | Complete |
 | `user-authentication-account-management` | Register, login, logout, current user, onboarding, courses, settings | Complete |
-| `learning-content` | Materials CRUD, material extraction stub, material detail, notes CRUD | Complete |
-| `ai-learning-assistant` | Tutor sessions, session messages, deterministic tutor replies | Complete |
+| `learning-content` | Materials CRUD, material extraction, material detail, notes CRUD | Complete |
+| `ai-learning-assistant` | Tutor sessions, session messages, backend-generated tutor replies | Complete |
 | `assessment-feedback-system` | Flashcards, confidence review, quizzes, quiz attempts, feedback | Complete |
 | `dashboard-progress-tracking` | Dashboard summary, progress timelines, daily progress snapshots | Complete |
 | `collaboration-study-rooms` | Study rooms, membership, board state, room messages | Complete |
@@ -48,7 +48,7 @@ Set `DATABASE_URL` in `.env.local`. The MVP default is:
 ```env
 DATABASE_URL="file:./dev.db"
 NOESIS_SESSION_SECRET="replace-with-a-long-random-secret"
-NOESIS_AI_PROVIDER="stub"
+NOESIS_AI_PROVIDER="local"
 ```
 
 ## Useful Commands
@@ -88,5 +88,5 @@ npm.cmd run prisma:seed
 ## Current Limitations
 
 - The backend branches are intentionally separate and have not been consolidated back into `master`.
-- AI tutor and material extraction behavior uses deterministic MVP stubs until provider keys and processing pipelines are configured.
+- AI tutor and material extraction behavior uses local backend services until external provider keys and processing pipelines are configured.
 - Peer review is pending and should be completed before final submission.

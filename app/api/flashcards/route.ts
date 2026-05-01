@@ -14,7 +14,7 @@ export async function GET() {
   try {
     const user = await requireUser();
     const cards = await prisma.flashcard.findMany({
-      where: { OR: [{ material: { userId: user.id } }, { materialId: null }] },
+      where: { OR: [{ userId: user.id }, { material: { userId: user.id } }] },
       include: { material: { select: { id: true, title: true } }, reviews: { where: { userId: user.id }, orderBy: { createdAt: "desc" }, take: 1 } },
       orderBy: { updatedAt: "desc" }
     });
@@ -34,7 +34,7 @@ export async function POST(request: Request) {
       const material = await prisma.material.findFirst({ where: { id: parsed.data.materialId, userId: user.id } });
       if (!material) return fail("not_found", "Material not found.");
     }
-    const card = await prisma.flashcard.create({ data: parsed.data });
+    const card = await prisma.flashcard.create({ data: { ...parsed.data, userId: user.id } });
     return created({ card });
   } catch {
     return fail("unauthorized", "Authentication required.");

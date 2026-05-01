@@ -8,22 +8,24 @@ datasource db {
 }
 
 model User {
-  id           String             @id @default(cuid())
-  email        String             @unique
-  name         String?
-  passwordHash String
-  createdAt    DateTime           @default(now())
-  updatedAt    DateTime           @updatedAt
-  sessions     Session[]
-  profile      UserProfile?
-  courses      Course[]
-  materials    Material[]
-  notes        Note[]
-  tutorSessions TutorSession[]
-  flashcardReviews FlashcardReview[]
-  quizAttempts QuizAttempt[]
-  roomMembers  StudyRoomMember[]
-  settings     UserSettings?
+  id                String             @id @default(cuid())
+  email             String             @unique
+  name              String?
+  passwordHash      String
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  sessions          Session[]
+  profile           UserProfile?
+  courses           Course[]
+  materials         Material[]
+  notes             Note[]
+  tutorSessions     TutorSession[]
+  flashcards        Flashcard[]
+  flashcardReviews  FlashcardReview[]
+  quizzes           Quiz[]
+  quizAttempts      QuizAttempt[]
+  roomMembers       StudyRoomMember[]
+  settings          UserSettings?
   progressSnapshots ProgressSnapshot[]
 }
 
@@ -37,15 +39,15 @@ model Session {
 }
 
 model UserProfile {
-  id              String   @id @default(cuid())
-  userId          String   @unique
-  field           String?
-  goal            String?
-  dailyMinutes    Int      @default(45)
-  onboardingDone  Boolean  @default(false)
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id             String   @id @default(cuid())
+  userId         String   @unique
+  field          String?
+  goal           String?
+  dailyMinutes   Int      @default(45)
+  onboardingDone Boolean  @default(false)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model UserSettings {
@@ -69,49 +71,50 @@ model Course {
   updatedAt DateTime   @updatedAt
   user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
   materials Material[]
+
   @@unique([userId, code])
 }
 
 model Material {
-  id          String      @id @default(cuid())
-  userId      String
-  courseId    String?
-  title       String
-  type        String
-  sourceName  String?
-  status      String      @default("uploaded")
-  summary     String?
-  progress    Int         @default(0)
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
-  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  course      Course?     @relation(fields: [courseId], references: [id], onDelete: SetNull)
-  notes       Note[]
-  flashcards  Flashcard[]
-  quizzes     Quiz[]
+  id         String      @id @default(cuid())
+  userId     String
+  courseId   String?
+  title      String
+  type       String
+  sourceName String?
+  status     String      @default("uploaded")
+  summary    String?
+  progress   Int         @default(0)
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+  user       User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course     Course?     @relation(fields: [courseId], references: [id], onDelete: SetNull)
+  notes      Note[]
+  flashcards Flashcard[]
+  quizzes    Quiz[]
 }
 
 model Note {
-  id         String   @id @default(cuid())
+  id         String    @id @default(cuid())
   userId     String
   materialId String?
   title      String
   body       String
-  tags       String   @default("[]")
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tags       String    @default("[]")
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   material   Material? @relation(fields: [materialId], references: [id], onDelete: SetNull)
 }
 
 model TutorSession {
-  id         String         @id @default(cuid())
-  userId     String
-  topic      String
-  createdAt  DateTime       @default(now())
-  updatedAt  DateTime       @updatedAt
-  user       User           @relation(fields: [userId], references: [id], onDelete: Cascade)
-  messages   TutorMessage[]
+  id        String         @id @default(cuid())
+  userId    String
+  topic     String
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+  user      User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  messages  TutorMessage[]
 }
 
 model TutorMessage {
@@ -126,12 +129,14 @@ model TutorMessage {
 
 model Flashcard {
   id         String            @id @default(cuid())
+  userId     String?
   materialId String?
   prompt     String
   answer     String
   concept    String?
   createdAt  DateTime          @default(now())
   updatedAt  DateTime          @updatedAt
+  user       User?             @relation(fields: [userId], references: [id], onDelete: Cascade)
   material   Material?         @relation(fields: [materialId], references: [id], onDelete: SetNull)
   reviews    FlashcardReview[]
 }
@@ -148,23 +153,25 @@ model FlashcardReview {
 }
 
 model Quiz {
-  id         String        @id @default(cuid())
+  id         String         @id @default(cuid())
+  userId     String?
   materialId String?
   title      String
-  createdAt  DateTime      @default(now())
-  updatedAt  DateTime      @updatedAt
-  material   Material?     @relation(fields: [materialId], references: [id], onDelete: SetNull)
+  createdAt  DateTime       @default(now())
+  updatedAt  DateTime       @updatedAt
+  user       User?          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  material   Material?      @relation(fields: [materialId], references: [id], onDelete: SetNull)
   questions  QuizQuestion[]
   attempts   QuizAttempt[]
 }
 
 model QuizQuestion {
-  id        String @id @default(cuid())
-  quizId    String
-  prompt    String
-  answer    String
-  choices   String @default("[]")
-  quiz      Quiz   @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  id      String @id @default(cuid())
+  quizId  String
+  prompt  String
+  answer  String
+  choices String @default("[]")
+  quiz    Quiz   @relation(fields: [quizId], references: [id], onDelete: Cascade)
 }
 
 model QuizAttempt {
@@ -180,24 +187,25 @@ model QuizAttempt {
 }
 
 model StudyRoom {
-  id        String            @id @default(cuid())
+  id        String             @id @default(cuid())
   name      String
   topic     String?
-  board     String            @default("{}")
-  createdAt DateTime          @default(now())
-  updatedAt DateTime          @updatedAt
+  board     String             @default("{}")
+  createdAt DateTime           @default(now())
+  updatedAt DateTime           @updatedAt
   members   StudyRoomMember[]
   messages  StudyRoomMessage[]
 }
 
 model StudyRoomMember {
-  id        String    @id @default(cuid())
-  roomId    String
-  userId    String
-  role      String    @default("member")
-  joinedAt  DateTime  @default(now())
-  room      StudyRoom @relation(fields: [roomId], references: [id], onDelete: Cascade)
-  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id       String    @id @default(cuid())
+  roomId   String
+  userId   String
+  role     String    @default("member")
+  joinedAt DateTime  @default(now())
+  room     StudyRoom @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   @@unique([roomId, userId])
 }
 
@@ -211,14 +219,15 @@ model StudyRoomMessage {
 }
 
 model ProgressSnapshot {
-  id              String   @id @default(cuid())
-  userId          String
-  date            DateTime
-  minutesStudied  Int      @default(0)
-  masteryScore    Int      @default(0)
-  cardsReviewed   Int      @default(0)
-  quizzesTaken    Int      @default(0)
-  createdAt       DateTime @default(now())
-  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id             String   @id @default(cuid())
+  userId         String
+  date           DateTime
+  minutesStudied Int      @default(0)
+  masteryScore   Int      @default(0)
+  cardsReviewed  Int      @default(0)
+  quizzesTaken   Int      @default(0)
+  createdAt      DateTime @default(now())
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   @@unique([userId, date])
 }

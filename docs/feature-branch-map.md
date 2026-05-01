@@ -42,3 +42,14 @@ This frontend prototype was split into branches by screen ownership so each bran
 - `components/Ambient3D.jsx`
 
 These shared files stay on `master` as the common shell/marketing foundation that every feature branch builds on.
+
+## Phase 3 Integration
+
+`phase-3-backend-completion` is the review branch for cross-feature backend wiring, ownership hardening, and unit tests after the original feature branches were merged into `master`. Feature ownership remains:
+
+- Auth/account changes: `components/Auth.jsx`, `components/Settings.jsx`, `app/api/auth/*`, `app/api/settings/*`, `app/api/onboarding/*`, `app/api/courses/*`.
+- Learning content changes: `components/Materials.jsx`, `components/Notes.jsx`, `app/api/materials/*`, `app/api/notes/*`.
+- Tutor changes: `components/Tutor.jsx`, `app/api/tutor/*`, `lib/learning-services.ts`.
+- Assessment changes: `components/Flashcards.jsx`, `components/Quiz.jsx`, `app/api/flashcards/*`, `app/api/quizzes/*`, `lib/assessment.ts`.
+- Dashboard/progress changes: `components/Dashboard.jsx`, `components/Progress.jsx`, `app/api/dashboard/*`, `app/api/progress/*`, `lib/progress-utils.ts`.
+- Collaboration changes: `components/Collab.jsx`, `app/api/study-rooms/*`, `lib/study-room-utils.ts`.

@@ -15,7 +15,7 @@ export async function POST(request: Request, { params }: { params: { id: string 
   try {
     const user = await requireUser();
     const card = await prisma.flashcard.findFirst({
-      where: { id: params.id, OR: [{ material: { userId: user.id } }, { materialId: null }] }
+      where: { id: params.id, OR: [{ userId: user.id }, { material: { userId: user.id } }] }
     });
     if (!card) return fail("not_found", "Flashcard not found.");
     const review = await prisma.flashcardReview.create({
