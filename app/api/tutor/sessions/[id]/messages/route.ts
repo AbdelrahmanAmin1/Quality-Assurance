@@ -2,7 +2,7 @@ import { z } from "zod";
 import { created, fail, ok, readJson } from "@/lib/api";
 import { requireUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { stubTutorReply } from "@/lib/stubs";
+import { generateTutorReply } from "@/lib/learning-services";
 
 const messageSchema = z.object({
   content: z.string().trim().min(1).max(4000)
@@ -29,7 +29,7 @@ export async function POST(request: Request, { params }: { params: { id: string 
     const session = await prisma.tutorSession.findFirst({ where: { id: params.id, userId: user.id } });
     if (!session) return fail("not_found", "Tutor session not found.");
 
-    const reply = stubTutorReply(parsed.data.content);
+    const reply = generateTutorReply(parsed.data.content);
     const [userMessage, assistantMessage] = await prisma.$transaction([
       prisma.tutorMessage.create({ data: { sessionId: params.id, role: "user", content: parsed.data.content } }),
       prisma.tutorMessage.create({

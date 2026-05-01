@@ -2,6 +2,7 @@ import { z } from "zod";
 import { fail, ok, readJson } from "@/lib/api";
 import { requireUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { serializeBoard } from "@/lib/study-room-utils";
 
 const roomUpdateSchema = z.object({
   name: z.string().trim().min(1).max(120).optional(),
@@ -44,7 +45,7 @@ export async function PATCH(request: Request, { params }: { params: { id: string
       data: {
         name: parsed.data.name,
         topic: parsed.data.topic,
-        board: parsed.data.board ? JSON.stringify(parsed.data.board) : undefined
+        board: parsed.data.board ? serializeBoard(parsed.data.board) : undefined
       }
     });
     return ok({ room });

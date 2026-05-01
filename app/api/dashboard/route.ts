@@ -1,12 +1,7 @@
 import { fail, ok } from "@/lib/api";
 import { requireUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-
-function startOfToday() {
-  const date = new Date();
-  date.setHours(0, 0, 0, 0);
-  return date;
-}
+import { average, startOfDay } from "@/lib/progress-utils";
 
 export async function GET() {
   try {
@@ -23,10 +18,8 @@ export async function GET() {
       prisma.progressSnapshot.findMany({ where: { userId: user.id }, orderBy: { date: "desc" }, take: 14 })
     ]);
 
-    const averageMastery = materials.length
-      ? Math.round(materials.reduce((sum, material) => sum + material.progress, 0) / materials.length)
-      : 0;
-    const today = snapshots.find((snapshot) => snapshot.date.getTime() === startOfToday().getTime());
+    const averageMastery = average(materials.map((material) => material.progress));
+    const today = snapshots.find((snapshot) => snapshot.date.getTime() === startOfDay().getTime());
 
     return ok({
       summary: {
@@ -36,7 +29,7 @@ export async function GET() {
         tutorSessionsThisWeek: tutorSessions,
         cardsReviewedThisWeek: cardReviews.length,
         quizAverageThisWeek: quizAttempts.length
-          ? Math.round(quizAttempts.reduce((sum, attempt) => sum + attempt.score, 0) / quizAttempts.length)
+          ? average(quizAttempts.map((attempt) => attempt.score))
           : 0,
         averageMastery,
         todayMinutes: today?.minutesStudied ?? 0

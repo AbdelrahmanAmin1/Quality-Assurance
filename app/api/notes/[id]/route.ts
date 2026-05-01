@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { fail, ok, readJson } from "@/lib/api";
 import { requireUser } from "@/lib/auth";
+import { serializeTags } from "@/lib/notes-utils";
 import { prisma } from "@/lib/prisma";
 
 const noteUpdateSchema = z.object({
@@ -30,7 +31,7 @@ export async function PATCH(request: Request, { params }: { params: { id: string
     if (!existing) return fail("not_found", "Note not found.");
     const note = await prisma.note.update({
       where: { id: params.id },
-      data: { ...parsed.data, tags: parsed.data.tags ? JSON.stringify(parsed.data.tags) : undefined }
+      data: { ...parsed.data, tags: parsed.data.tags ? serializeTags(parsed.data.tags) : undefined }
     });
     return ok({ note });
   } catch {

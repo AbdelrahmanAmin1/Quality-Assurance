@@ -2,6 +2,7 @@ import { z } from "zod";
 import { created, fail, readJson } from "@/lib/api";
 import { requireUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { startOfDay } from "@/lib/progress-utils";
 
 const snapshotSchema = z.object({
   date: z.string().datetime().optional(),
@@ -11,19 +12,13 @@ const snapshotSchema = z.object({
   quizzesTaken: z.number().int().min(0).max(1000).default(0)
 });
 
-function normalizeDay(value?: string) {
-  const date = value ? new Date(value) : new Date();
-  date.setHours(0, 0, 0, 0);
-  return date;
-}
-
 export async function POST(request: Request) {
   const parsed = await readJson(request, snapshotSchema);
   if ("error" in parsed) return parsed.error;
 
   try {
     const user = await requireUser();
-    const date = normalizeDay(parsed.data.date);
+    const date = startOfDay(parsed.data.date ? new Date(parsed.data.date) : new Date());
     const snapshot = await prisma.progressSnapshot.upsert({
       where: { userId_date: { userId: user.id, date } },
       update: {

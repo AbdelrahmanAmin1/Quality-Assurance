@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { created, fail, readJson } from "@/lib/api";
 import { requireUser } from "@/lib/auth";
+import { scoreQuizAttempt } from "@/lib/assessment";
 import { prisma } from "@/lib/prisma";
 
 const attemptSchema = z.object({
@@ -17,15 +18,12 @@ export async function POST(request: Request, { params }: { params: { id: string 
   try {
     const user = await requireUser();
     const quiz = await prisma.quiz.findFirst({
-      where: { id: params.id, OR: [{ material: { userId: user.id } }, { materialId: null }] },
+      where: { id: params.id, OR: [{ userId: user.id }, { material: { userId: user.id } }] },
       include: { questions: true }
     });
     if (!quiz) return fail("not_found", "Quiz not found.");
 
-    const answerMap = new Map(parsed.data.answers.map((entry) => [entry.questionId, entry.answer.trim().toLowerCase()]));
-    const correct = quiz.questions.filter((question) => answerMap.get(question.id) === question.answer.trim().toLowerCase()).length;
-    const score = Math.round((correct / quiz.questions.length) * 100);
-    const feedback = score >= 80 ? "Strong attempt. Review only missed concepts." : "Review the explanations and retry after a short spaced-repetition pass.";
+    const { correct, total, score, feedback } = scoreQuizAttempt(quiz.questions, parsed.data.answers);
 
     const attempt = await prisma.quizAttempt.create({
       data: {
@@ -36,7 +34,7 @@ export async function POST(request: Request, { params }: { params: { id: string 
         feedback
       }
     });
-    return created({ attempt, correct, total: quiz.questions.length });
+    return created({ attempt, correct, total });
   } catch {
     return fail("unauthorized", "Authentication required.");
   }

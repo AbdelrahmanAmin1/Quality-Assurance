@@ -30,6 +30,7 @@ for (const path of [
   "../app/api/tutor/sessions/[id]/messages/route.ts",
   "../app/api/tutor/explain/route.ts",
   "../app/api/flashcards/route.ts",
+  "../app/api/flashcards/[id]/route.ts",
   "../app/api/flashcards/[id]/review/route.ts",
   "../app/api/quizzes/route.ts",
   "../app/api/quizzes/[id]/route.ts",
@@ -42,9 +43,13 @@ for (const path of [
   "../app/api/study-rooms/[id]/join/route.ts",
   "../app/api/study-rooms/[id]/messages/route.ts",
   "../lib/api.ts",
+  "../lib/assessment.ts",
   "../lib/auth.ts",
+  "../lib/learning-services.ts",
+  "../lib/notes-utils.ts",
   "../lib/prisma.ts",
-  "../lib/stubs.ts"
+  "../lib/progress-utils.ts",
+  "../lib/study-room-utils.ts"
 ]) {
   assert.equal(existsSync(new URL(path, import.meta.url)), true, `${path} should exist`);
 }

@@ -19,7 +19,7 @@ export async function GET() {
   try {
     const user = await requireUser();
     const quizzes = await prisma.quiz.findMany({
-      where: { OR: [{ material: { userId: user.id } }, { materialId: null }] },
+      where: { OR: [{ userId: user.id }, { material: { userId: user.id } }] },
       include: { material: { select: { id: true, title: true } }, questions: true, attempts: { where: { userId: user.id }, orderBy: { createdAt: "desc" }, take: 1 } },
       orderBy: { updatedAt: "desc" }
     });
@@ -41,6 +41,7 @@ export async function POST(request: Request) {
     }
     const quiz = await prisma.quiz.create({
       data: {
+        userId: user.id,
         title: parsed.data.title,
         materialId: parsed.data.materialId,
         questions: {
