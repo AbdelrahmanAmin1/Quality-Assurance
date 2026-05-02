@@ -13,3 +13,9 @@ test("dashboard-progress-tracking: aggregates handle values and empty inputs", (
   assert.equal(average([]), 0);
   assert.equal(sum([15, 30, 45]), 90);
 });
+
+test("dashboard-progress-tracking: aggregates ignore invalid numeric inputs", () => {
+  assert.equal(average([10, Number.NaN, Number.POSITIVE_INFINITY]), 10);
+  assert.equal(sum([15, "bad", null, 30] as unknown[]), 45);
+  assert.equal(average(null as unknown as unknown[]), 0);
+});

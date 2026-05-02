@@ -1,6 +1,6 @@
 # Backend Unit Test Report
 
-Generated: 2026-05-01
+Generated: 2026-05-02
 
 Command:
 
@@ -12,38 +12,57 @@ Status: passing after the latest local run.
 
 | Feature branch | Unit test file | Test count |
 | --- | --- | ---: |
-| `noesis-backend-foundation` | `tests/noesis-backend-foundation.test.ts` | 3 |
-| `user-authentication-account-management` | `tests/user-authentication-account-management.test.ts` | 3 |
-| `learning-content` | `tests/learning-content.test.ts` | 3 |
-| `ai-learning-assistant` | `tests/ai-learning-assistant.test.ts` | 2 |
-| `assessment-feedback-system` | `tests/assessment-feedback-system.test.ts` | 3 |
-| `dashboard-progress-tracking` | `tests/dashboard-progress-tracking.test.ts` | 2 |
-| `collaboration-study-rooms` | `tests/collaboration-study-rooms.test.ts` | 2 |
+| `noesis-backend-foundation` | `tests/noesis-backend-foundation.test.ts` | 4 |
+| `user-authentication-account-management` | `tests/user-authentication-account-management.test.ts` | 4 |
+| `learning-content` | `tests/learning-content.test.ts` | 4 |
+| `ai-learning-assistant` | `tests/ai-learning-assistant.test.ts` | 3 |
+| `assessment-feedback-system` | `tests/assessment-feedback-system.test.ts` | 4 |
+| `dashboard-progress-tracking` | `tests/dashboard-progress-tracking.test.ts` | 3 |
+| `collaboration-study-rooms` | `tests/collaboration-study-rooms.test.ts` | 3 |
+
+## Testing Checklist Coverage
+
+| Feature branch | Unit test file | Happy path | Edge cases | Negative cases |
+| --- | --- | --- | --- | --- |
+| `noesis-backend-foundation` | `tests/noesis-backend-foundation.test.ts` | `ok response wraps backend data` | `pagination has safe defaults and bounds` | `fail response maps error code to status`<br>`readJson rejects malformed or invalid bodies` |
+| `user-authentication-account-management` | `tests/user-authentication-account-management.test.ts` | `validators normalize email and enforce password length`<br>`password hashes verify only matching secrets` | `public user handles nullable profile fields` | `invalid auth inputs and malformed hashes are rejected` |
+| `learning-content` | `tests/learning-content.test.ts` | `material extraction creates metadata from uploaded filename`<br>`note tags are trimmed, deduplicated, and serialized` | `material extraction handles empty names safely` | `invalid tag and metadata inputs do not crash` |
+| `ai-learning-assistant` | `tests/ai-learning-assistant.test.ts` | `tutor reply includes the incoming prompt` | `empty prompt still returns a safe tutoring response` | `invalid prompt types do not crash` |
+| `assessment-feedback-system` | `tests/assessment-feedback-system.test.ts` | `answers normalize before scoring`<br>`quiz scoring covers correct, missing, and wrong answers` | `empty quizzes score without crashing` | `invalid answer inputs do not crash scoring` |
+| `dashboard-progress-tracking` | `tests/dashboard-progress-tracking.test.ts` | `startOfDay normalizes date values` | `aggregates handle values and empty inputs` | `aggregates ignore invalid numeric inputs` |
+| `collaboration-study-rooms` | `tests/collaboration-study-rooms.test.ts` | `board state serializes for storage` | `board text parser handles valid and invalid content` | `invalid board values do not crash` |
 
 ## Test Details
 
-| Feature branch | Unit test file | Test | What it does |
-| --- | --- | --- | --- |
-| `noesis-backend-foundation` | `tests/noesis-backend-foundation.test.ts` | ok response wraps backend data | Verifies successful API helpers return HTTP 200 JSON in the shared `{ data }` shape. |
-| `noesis-backend-foundation` | `tests/noesis-backend-foundation.test.ts` | fail response maps error code to status | Verifies shared API errors produce the expected HTTP status and `{ error }` body. |
-| `noesis-backend-foundation` | `tests/noesis-backend-foundation.test.ts` | pagination has safe defaults and bounds | Verifies default pagination values and rejects oversized page sizes. |
-| `user-authentication-account-management` | `tests/user-authentication-account-management.test.ts` | validators normalize email and enforce password length | Verifies auth input validation lowercases emails and rejects weak passwords. |
-| `user-authentication-account-management` | `tests/user-authentication-account-management.test.ts` | password hashes verify only matching secrets | Verifies password hashing accepts the correct password and rejects an incorrect one. |
-| `user-authentication-account-management` | `tests/user-authentication-account-management.test.ts` | public user hides sensitive fields | Verifies the public user serializer omits password/session data. |
-| `learning-content` | `tests/learning-content.test.ts` | material extraction creates metadata from uploaded filename | Verifies backend material metadata is derived from the uploaded filename. |
-| `learning-content` | `tests/learning-content.test.ts` | material extraction handles empty names safely | Verifies empty or extension-only filenames do not crash and receive a fallback title. |
-| `learning-content` | `tests/learning-content.test.ts` | note tags are trimmed, deduplicated, and serialized | Verifies note tags are cleaned before being stored as JSON. |
-| `ai-learning-assistant` | `tests/ai-learning-assistant.test.ts` | tutor reply includes the incoming prompt | Verifies the tutor service uses the student's prompt and returns follow-up prompts. |
-| `ai-learning-assistant` | `tests/ai-learning-assistant.test.ts` | empty prompt still returns a safe tutoring response | Verifies blank prompts do not crash and return a useful fallback response. |
-| `assessment-feedback-system` | `tests/assessment-feedback-system.test.ts` | answers normalize before scoring | Verifies answer comparison trims whitespace and ignores casing. |
-| `assessment-feedback-system` | `tests/assessment-feedback-system.test.ts` | quiz scoring covers correct, missing, and wrong answers | Verifies mixed answer submissions calculate correct count, total, and score. |
-| `assessment-feedback-system` | `tests/assessment-feedback-system.test.ts` | empty quizzes score without crashing | Verifies the scorer handles an empty quiz safely. |
-| `dashboard-progress-tracking` | `tests/dashboard-progress-tracking.test.ts` | startOfDay normalizes date values | Verifies progress snapshots are grouped by midnight-normalized dates. |
-| `dashboard-progress-tracking` | `tests/dashboard-progress-tracking.test.ts` | aggregates handle values and empty inputs | Verifies average and sum helpers work for normal and empty datasets. |
-| `collaboration-study-rooms` | `tests/collaboration-study-rooms.test.ts` | board state serializes for storage | Verifies room board objects are stored as JSON strings. |
-| `collaboration-study-rooms` | `tests/collaboration-study-rooms.test.ts` | board text parser handles valid and invalid content | Verifies board parsing reads valid text and safely ignores invalid JSON. |
+| Feature branch | Unit test file | Checklist area | Test | What it does |
+| --- | --- | --- | --- | --- |
+| `noesis-backend-foundation` | `tests/noesis-backend-foundation.test.ts` | Happy path | ok response wraps backend data | Verifies successful API helpers return HTTP 200 JSON in the shared `{ data }` shape. |
+| `noesis-backend-foundation` | `tests/noesis-backend-foundation.test.ts` | Negative | fail response maps error code to status | Verifies shared API errors produce the expected HTTP status and `{ error }` body. |
+| `noesis-backend-foundation` | `tests/noesis-backend-foundation.test.ts` | Edge | pagination has safe defaults and bounds | Verifies default pagination values, max allowed page size, and oversized page rejection. |
+| `noesis-backend-foundation` | `tests/noesis-backend-foundation.test.ts` | Negative | readJson rejects malformed or invalid bodies | Verifies malformed JSON and wrong request body types return controlled HTTP 400 errors. |
+| `user-authentication-account-management` | `tests/user-authentication-account-management.test.ts` | Happy path | validators normalize email and enforce password length | Verifies auth input validation lowercases valid emails and enforces password constraints. |
+| `user-authentication-account-management` | `tests/user-authentication-account-management.test.ts` | Happy path | password hashes verify only matching secrets | Verifies password hashing accepts the correct password and rejects an incorrect one. |
+| `user-authentication-account-management` | `tests/user-authentication-account-management.test.ts` | Edge | public user handles nullable profile fields | Verifies the public user serializer handles a null profile name while omitting sensitive fields. |
+| `user-authentication-account-management` | `tests/user-authentication-account-management.test.ts` | Negative | invalid auth inputs and malformed hashes are rejected | Verifies invalid emails, wrong input types, overlong passwords, and malformed hashes fail safely. |
+| `learning-content` | `tests/learning-content.test.ts` | Happy path | material extraction creates metadata from uploaded filename | Verifies backend material metadata is derived from the uploaded filename. |
+| `learning-content` | `tests/learning-content.test.ts` | Edge | material extraction handles empty names safely | Verifies empty or extension-only filenames do not crash and receive a fallback title. |
+| `learning-content` | `tests/learning-content.test.ts` | Happy path | note tags are trimmed, deduplicated, and serialized | Verifies note tags are cleaned before being stored as JSON. |
+| `learning-content` | `tests/learning-content.test.ts` | Negative | invalid tag and metadata inputs do not crash | Verifies wrong runtime values are ignored or converted to safe fallback material/tag output. |
+| `ai-learning-assistant` | `tests/ai-learning-assistant.test.ts` | Happy path | tutor reply includes the incoming prompt | Verifies the tutor service uses the student's prompt and returns follow-up prompts. |
+| `ai-learning-assistant` | `tests/ai-learning-assistant.test.ts` | Edge | empty prompt still returns a safe tutoring response | Verifies blank prompts do not crash and return a useful fallback response. |
+| `ai-learning-assistant` | `tests/ai-learning-assistant.test.ts` | Negative | invalid prompt types do not crash | Verifies non-string prompt values return the same safe tutoring fallback. |
+| `assessment-feedback-system` | `tests/assessment-feedback-system.test.ts` | Happy path | answers normalize before scoring | Verifies answer comparison trims whitespace and ignores casing. |
+| `assessment-feedback-system` | `tests/assessment-feedback-system.test.ts` | Happy path | quiz scoring covers correct, missing, and wrong answers | Verifies mixed answer submissions calculate correct count, total, and score. |
+| `assessment-feedback-system` | `tests/assessment-feedback-system.test.ts` | Edge | empty quizzes score without crashing | Verifies the scorer handles an empty quiz safely. |
+| `assessment-feedback-system` | `tests/assessment-feedback-system.test.ts` | Negative | invalid answer inputs do not crash scoring | Verifies null or malformed answer inputs produce controlled zero-score output. |
+| `dashboard-progress-tracking` | `tests/dashboard-progress-tracking.test.ts` | Happy path | startOfDay normalizes date values | Verifies progress snapshots are grouped by midnight-normalized dates. |
+| `dashboard-progress-tracking` | `tests/dashboard-progress-tracking.test.ts` | Edge | aggregates handle values and empty inputs | Verifies average and sum helpers work for normal and empty datasets. |
+| `dashboard-progress-tracking` | `tests/dashboard-progress-tracking.test.ts` | Negative | aggregates ignore invalid numeric inputs | Verifies NaN, infinity, null, and wrong-type values are ignored without crashing. |
+| `collaboration-study-rooms` | `tests/collaboration-study-rooms.test.ts` | Happy path | board state serializes for storage | Verifies room board objects are stored as JSON strings. |
+| `collaboration-study-rooms` | `tests/collaboration-study-rooms.test.ts` | Edge | board text parser handles valid and invalid content | Verifies board parsing reads valid text and safely ignores invalid JSON. |
+| `collaboration-study-rooms` | `tests/collaboration-study-rooms.test.ts` | Negative | invalid board values do not crash | Verifies null boards and non-string board text values return safe empty output. |
 
 Additional checks included in the test command:
 
 - `tests/smoke.mjs` confirms every backend route and shared backend module exists.
-- The separate branch-owned unit tests cover happy paths, empty input handling, invalid input handling, and non-crashing edge cases where those behaviors live in shared backend logic.
+- The separate branch-owned unit tests now explicitly cover happy paths, edge cases, negative cases, and non-crashing invalid input handling where those behaviors live in shared backend logic.

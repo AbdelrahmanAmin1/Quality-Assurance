@@ -18,3 +18,10 @@ test("learning-content: material extraction handles empty names safely", () => {
 test("learning-content: note tags are trimmed, deduplicated, and serialized", () => {
   assert.equal(serializeTags([" concept ", "concept", "", "exam"]), JSON.stringify(["concept", "exam"]));
 });
+
+test("learning-content: invalid tag and metadata inputs do not crash", () => {
+  const result = extractMaterialMetadata(42, { unsupported: true });
+  assert.equal(result.title, "Untitled material");
+  assert.equal(serializeTags(["valid", 42, null, "", " valid "] as unknown[]), JSON.stringify(["valid"]));
+  assert.equal(serializeTags(null as unknown as unknown[]), JSON.stringify([]));
+});
