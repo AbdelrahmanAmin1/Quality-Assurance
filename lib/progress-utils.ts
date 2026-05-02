@@ -4,10 +4,15 @@ export function startOfDay(value = new Date()) {
   return date;
 }
 
-export function average(values: number[]) {
-  return values.length ? Math.round(values.reduce((sum, value) => sum + value, 0) / values.length) : 0;
+function finiteValues(values: unknown[]) {
+  return Array.isArray(values) ? values.filter((value): value is number => typeof value === "number" && Number.isFinite(value)) : [];
 }
 
-export function sum(values: number[]) {
-  return values.reduce((total, value) => total + value, 0);
+export function average(values: unknown[]) {
+  const numbers = finiteValues(values);
+  return numbers.length ? Math.round(numbers.reduce((sum, value) => sum + value, 0) / numbers.length) : 0;
+}
+
+export function sum(values: unknown[]) {
+  return finiteValues(values).reduce((total, value) => total + value, 0);
 }

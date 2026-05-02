@@ -13,3 +13,9 @@ test("ai-learning-assistant: empty prompt still returns a safe tutoring response
   const reply = generateTutorReply("   ");
   assert.match(reply.message, /this concept/);
 });
+
+test("ai-learning-assistant: invalid prompt types do not crash", () => {
+  const reply = generateTutorReply(null);
+  assert.match(reply.message, /this concept/);
+  assert.equal(reply.nextPrompts.length, 3);
+});

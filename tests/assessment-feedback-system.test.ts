@@ -23,3 +23,9 @@ test("assessment-feedback-system: empty quizzes score without crashing", () => {
   const result = scoreQuizAttempt([], []);
   assert.deepEqual({ correct: result.correct, total: result.total, score: result.score }, { correct: 0, total: 0, score: 0 });
 });
+
+test("assessment-feedback-system: invalid answer inputs do not crash scoring", () => {
+  assert.equal(normalizeAnswer(null), "");
+  const result = scoreQuizAttempt(null as unknown as [], [{ questionId: "q1", answer: null } as unknown as { questionId: string; answer: string }]);
+  assert.deepEqual({ correct: result.correct, total: result.total, score: result.score }, { correct: 0, total: 0, score: 0 });
+});

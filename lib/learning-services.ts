@@ -8,8 +8,9 @@ const materialTypeLabels: Record<string, string> = {
   code: "code file"
 };
 
-function cleanTitle(value: string) {
-  return value
+function cleanTitle(value: unknown) {
+  const rawValue = typeof value === "string" ? value : "";
+  return rawValue
     .replace(/\.[^.]+$/, "")
     .replace(/[-_]+/g, " ")
     .replace(/\s+/g, " ")
@@ -17,8 +18,9 @@ function cleanTitle(value: string) {
     .slice(0, 160) || "Untitled material";
 }
 
-export function generateTutorReply(prompt: string) {
-  const topic = prompt.trim().replace(/\s+/g, " ").slice(0, 120) || "this concept";
+export function generateTutorReply(prompt: unknown) {
+  const rawPrompt = typeof prompt === "string" ? prompt : "";
+  const topic = rawPrompt.trim().replace(/\s+/g, " ").slice(0, 120) || "this concept";
   const question = topic.endsWith("?") ? topic : `${topic}?`;
 
   return {
@@ -31,9 +33,10 @@ export function generateTutorReply(prompt: string) {
   };
 }
 
-export function extractMaterialMetadata(filename: string, type = "pdf") {
+export function extractMaterialMetadata(filename: unknown, type: unknown = "pdf") {
   const title = cleanTitle(filename);
-  const label = materialTypeLabels[type] || "material";
+  const materialType = typeof type === "string" ? type : "pdf";
+  const label = materialTypeLabels[materialType] || "material";
 
   return {
     status: "processed" as const,

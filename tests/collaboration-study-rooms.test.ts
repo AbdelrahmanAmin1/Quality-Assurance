@@ -11,3 +11,9 @@ test("collaboration-study-rooms: board text parser handles valid and invalid con
   assert.equal(readBoardText(JSON.stringify({ text: "Shared notes" })), "Shared notes");
   assert.equal(readBoardText("{invalid"), "");
 });
+
+test("collaboration-study-rooms: invalid board values do not crash", () => {
+  assert.equal(serializeBoard(null), JSON.stringify({}));
+  assert.equal(readBoardText(null), "");
+  assert.equal(readBoardText(JSON.stringify({ text: 42 })), "");
+});
